@@ -1,0 +1,13 @@
+TODO:
+
+cv_parser.py
+    Retrieve all *.data.jpg files and run a parser on each
+    Run edge detect
+    Convert Mat to NumPy
+
+trainer.py
+    Retrieve a NumPy array from cv_parser.py
+    Convert NumPy array to Tensor
+    Perform a MNIST on the Tensor
+    Profit
+
