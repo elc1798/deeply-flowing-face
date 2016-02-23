@@ -4,7 +4,11 @@ import numpy
 
 def get_data_set():
     files = img_parser.get_all_data_files()
-    return [mat2array(edge_detect(f)) for f in files]
+    return [img_parser.mat2array(img_parser.edge_detect(f)) for f in files]
+
+def get_test_set():
+    files = img_parser.get_all_test_files()
+    return [img_parser.mat2array(img_parser.edge_detect(f)) for f in files]
 
 def init_weights(shape):
     return tf.Variable(tf.random_normal(shape, stddev=0.01))
@@ -29,4 +33,7 @@ def model(input_layer, weight1, weight2, weight3, weight4, output_weight, p_keep
 
     output_layer = tf.matmul(il_4, output_weight)
     return output_layer
+
+train_imgs = get_data_set()
+test_imgs = get_test_set()
 
