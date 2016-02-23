@@ -1,9 +1,12 @@
 TODO:
 
 cv_parser.py
-    Retrieve all *.data.jpg files and run a parser on each
-    Run edge detect
-    Convert Mat to NumPy
+    X Retrieve all *.data.jpg files and run a parser on each
+    X Run edge detect
+    - Save all the procced data images into "INPUTS/" and save with the labels
+    - Make a function to return a tensor for input and a tensor of the string
+      labels
+    X Convert Mat to NumPy
 
 trainer.py
     Retrieve a NumPy array from cv_parser.py
