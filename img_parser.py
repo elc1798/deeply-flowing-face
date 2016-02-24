@@ -1,5 +1,6 @@
 import cv2
 import numpy
+import tensorflow as tf
 import glob, os
 
 # ========== FUNCTIONS FOR IMAGE PROCESSING ==========
@@ -63,16 +64,64 @@ def get_all_input_files():
 #  [ 0.  0.  0. ...,  0.  0.  0.]
 #  [ 0.  0.  0. ...,  0.  1.  0.]]
 
-def get_all_data_labels():
-    pass
+def generate_input_name(data_filename):
+    """
+    Note that data_filename is in the format: NUMBER_LABEL.data.jpg. This
+    function takes such a string and returns the string for the input file.
 
-def edge_detect(picture):
-    img = cv2.imread(picture, 0) # Load the image in grayscale
-    img = cv2.resize(image, (320, 240))
-    img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
-    edges = cv2.Canny(img, 100, 200, 5)
-    return edges
+    Params:
+        data_filename - name of a data file
 
-def mat2array(mat):
-    return numpy.asarray(mat)
+    Returns:
+        The corresponding name of the input file for provided data file, as a
+        string.
+    """
+    name = data_filename[5:].split(".data.jpg")[0]
+    return "INPUTS/" + name + ".input.png"
+
+def generate_inputs():
+    """
+    Generates and populates the INPUTS/ directory with input pictures processed
+    from the DATA/ directory.
+    """
+    files = get_all_data_files()
+    for f in files:
+        processed = edge_detect(f)
+        cv2.imwrite(generate_input_name(f), processed)
+
+def get_input_producer():
+    """
+    Returns a TensorFlow String Input Producer using inputs from the INPUTS/
+    directory.
+
+    Params:
+        None
+
+    Returns:
+        A Tensor
+    """
+    input_files = get_all_input_files()
+    image_list = []
+    for f in input_files:
+        the_important_part_of_the_filename = f[7:].split(".input.png")[0]
+        entry = the_important_part_of_the_filename.split("_")
+        # entry[0] is the number
+        # entry[1] is the label
+        image_list.append(f + " " + entry[1])
+    return tf.train.string_input_producer(image_list)
+
+def get_train_set(filename_and_label_tensor):
+    """
+    Consumes a single filename and label as a ' '-delimited string.
+
+    Params:
+        filename_and_label_tensor: A scalar string tensor.
+
+    Returns:
+        Two tensors: the decoded image, and the string label.
+    """
+    filename, label = tf.decode_csv(filename_and_label_tensor, [[""], [""]], " ")
+    file_contents = tf.read_file(filename)
+    input_pic = tf.image.decode_png(file_contents)
+    return input_pic, label
 

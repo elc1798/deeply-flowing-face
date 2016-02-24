@@ -34,6 +34,10 @@ def model(input_layer, weight1, weight2, weight3, weight4, output_weight, p_keep
     output_layer = tf.matmul(il_4, output_weight)
     return output_layer
 
-train_imgs = get_data_set()
-test_imgs = get_test_set()
+INPUT_PRODUCER = img_parser.get_input_producer()
+train_img, train_label = img_parser.get_train_set(INPUT_PRODUCER.dequeue())
+
+train_img.reshape(-1, 320, 240, 1)
+
+X = tf.placeholder("float", [None, 320, 240, 1])
 
