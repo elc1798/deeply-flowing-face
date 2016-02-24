@@ -37,6 +37,9 @@ def model(input_layer, weight1, weight2, weight3, weight4, output_weight, p_keep
 INPUT_PRODUCER = img_parser.get_input_producer()
 train_img, train_label = img_parser.get_train_set(INPUT_PRODUCER.dequeue())
 
+TEST_PRODUCER = img_parser.get_test_producer()
+test_img, test_label = img_parser.get_test_set(TEST_PRODUCER.dequeue())
+
 train_img.reshape(-1, 320, 240, 1)
 
 X = tf.placeholder("float", [None, 320, 240, 1])
@@ -59,4 +62,40 @@ prediction_operation = tf.argmax(training_model, 1)
 
 sess = tf.Session()
 sess.run(tf.initialize_all_variables())
+
+num_right = 0
+accuracy = 1.0
+
+for i in range(500):
+    for start, end in zip(range(0, len(train_img), 128), range(128,
+        len(train_img), 128)):
+        sess.run(training_operation, feed_dict={
+            X: train_img[start : end],
+            Y: train_label[start : end],
+            p_keep_conv: 0.8,
+            p_keep_hidden: 0.5
+        })
+
+    test_indices = numpy.arange(len(test_img)) # Test batch
+    numpy.random.shuffle(test_indices)
+    test_indices = test_indices[0 : 256] # Limit tests to the first 256 tests
+
+    FEEDBACK_STRING = str(i)
+    PREDICTION = (np.mean(np.argmax(test_label[test_indices], axis=1) ==
+        sess.run(prediction_operation, feed_dict={
+            X: test_img[test_indices],
+            Y: test_label[test_indices],
+            p_keep_conv: 1.0,
+            p_keep_hidden: 1.0
+        })))
+
+    if (PREDICTION):
+        num_right += 1
+        accuracy = num_right / i
+
+    FEEDBACK_STRING += " RES: " + str(PREDICTION)
+    print FEEDBACK_STRING
+
+print("FINAL ACCURACY:")
+print (accuracy * 100)
 
