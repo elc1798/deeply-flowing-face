@@ -1,14 +1,14 @@
-import img_parser
+import utils
 import tensorflow as tf
 import numpy
 
 def get_data_set():
-    files = img_parser.get_all_data_files()
-    return [img_parser.mat2array(img_parser.edge_detect(f)) for f in files]
+    files = utils.get_all_data_files()
+    return [utils.mat2array(utils.edge_detect(f)) for f in files]
 
 def get_test_set():
-    files = img_parser.get_all_test_files()
-    return [img_parser.mat2array(img_parser.edge_detect(f)) for f in files]
+    files = utils.get_all_test_files()
+    return [utils.mat2array(utils.edge_detect(f)) for f in files]
 
 def init_weights(shape):
     return tf.Variable(tf.random_normal(shape, stddev=0.01))
@@ -34,11 +34,11 @@ def model(input_layer, weight1, weight2, weight3, weight4, output_weight, p_keep
     output_layer = tf.matmul(il_4, output_weight)
     return output_layer
 
-INPUT_PRODUCER = img_parser.get_input_producer()
-train_img, train_label = img_parser.get_train_set(INPUT_PRODUCER.dequeue())
+INPUT_PRODUCER = utils.get_input_producer()
+train_img, train_label = utils.get_train_set(INPUT_PRODUCER.dequeue())
 
-TEST_PRODUCER = img_parser.get_test_producer()
-test_img, test_label = img_parser.get_test_set(TEST_PRODUCER.dequeue())
+TEST_PRODUCER = utils.get_test_producer()
+test_img, test_label = utils.get_test_set(TEST_PRODUCER.dequeue())
 
 train_img.reshape(-1, 320, 240, 1)
 

@@ -41,12 +41,6 @@ def get_all_data_files():
     """
     return list(glob.glob("DATA/*.data.jpg"))
 
-def get_all_test_files():
-    """
-    Returns a list of all the .data.jpg files in TEST/
-    """
-    return list(glob.glob("TEST/*.data.jpg"))
-
 def get_all_input_files():
     """
     returns a list of all the .input.png files in INPUTS/
