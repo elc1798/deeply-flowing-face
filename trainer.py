@@ -40,4 +40,23 @@ train_img, train_label = img_parser.get_train_set(INPUT_PRODUCER.dequeue())
 train_img.reshape(-1, 320, 240, 1)
 
 X = tf.placeholder("float", [None, 320, 240, 1])
+Y = tf.placeholder("float", [None, 10])
+
+weight1 = init_weights([3, 3, 1, 32])
+weight2 = init_weights([3, 3, 32, 64])
+weight3 = init_weights([3, 3, 64, 128])
+weight4 = init_weights([128 * 4 * 4, 625])
+output_weight = init_weights([625, 10])
+
+p_keep_conv = tf.placeholder("float")
+p_keep_hidden = tf.placeholder("float")
+training_model = model(X, weight1, weight2, weight3, weight4, output_weight,
+        p_keep_conv, p_keep_hidden)
+
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(training_model, Y))
+training_operation = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cost)
+prediction_operation = tf.argmax(training_model, 1)
+
+sess = tf.Session()
+sess.run(tf.initialize_all_variables())
 
