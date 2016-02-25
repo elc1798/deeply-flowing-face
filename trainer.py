@@ -2,14 +2,6 @@ import utils
 import tensorflow as tf
 import numpy
 
-def get_data_set():
-    files = utils.get_all_data_files()
-    return [utils.mat2array(utils.edge_detect(f)) for f in files]
-
-def get_test_set():
-    files = utils.get_all_test_files()
-    return [utils.mat2array(utils.edge_detect(f)) for f in files]
-
 def init_weights(shape):
     return tf.Variable(tf.random_normal(shape, stddev=0.01))
 
