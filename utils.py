@@ -2,6 +2,7 @@ import cv2
 import numpy
 import tensorflow as tf
 import glob, os
+import random
 
 # ========== FUNCTIONS FOR IMAGE PROCESSING ==========
 
@@ -16,7 +17,7 @@ def edge_detect(picture):
         The Canny edges detected in `picture`
     """
     img = cv2.imread(picture, 0) # Load the image in grayscale
-    img = cv2.resize(image, (320, 240))
+    img = cv2.resize(img, (320, 240))
     img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
     edges = cv2.Canny(img, 100, 200, 5)
     return edges
@@ -101,6 +102,7 @@ def generate_inputs():
     the DATA/ files are used as INPUTS, and the second half is used for TESTS/
     """
     files = get_all_data_files()
+    random.shuffle(files)
     for f in files[ : len(files) / 2]:
         processed = edge_detect(f)
         cv2.imwrite(generate_input_name(f), processed)
@@ -178,4 +180,7 @@ def get_test_set(filename_and_label_tensor):
         Two tensors: the decoded image, and the string label.
     """
     return get_train_set(filename_and_label_tensor)
+
+if __name__ == "__main__":
+    generate_inputs()
 

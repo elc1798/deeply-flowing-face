@@ -26,13 +26,33 @@ def model(input_layer, weight1, weight2, weight3, weight4, output_weight, p_keep
     output_layer = tf.matmul(il_4, output_weight)
     return output_layer
 
+train_set = []
+train_lbls = []
+
+test_set = []
+test_lbls = []
+
 INPUT_PRODUCER = utils.get_input_producer()
-train_img, train_label = utils.get_train_set(INPUT_PRODUCER.dequeue())
+
+input_len = len(utils.get_all_input_files())
+while input_len > 0:
+    print INPUT_PRODUCER.size()
+    train_img, train_label = utils.get_train_set(INPUT_PRODUCER.dequeue())
+    train_img.set_shape([320, 240, 1])
+    train_set.append(train_img)
+    train_lbls.append(train_label)
+    input_len -= 1
+
 
 TEST_PRODUCER = utils.get_test_producer()
-test_img, test_label = utils.get_test_set(TEST_PRODUCER.dequeue())
 
-train_img.reshape(-1, 320, 240, 1)
+test_len = len(utils.get_all_test_files())
+while test_len > 0:
+    test_img, test_label = utils.get_test_set(TEST_PRODUCER.dequeue())
+    test_img.set_shape([320, 240, 1])
+    test_set.append(test_img)
+    test_lbls.append(test_label)
+    test_len -= 1
 
 X = tf.placeholder("float", [None, 320, 240, 1])
 Y = tf.placeholder("float", [None, 10])
@@ -59,8 +79,7 @@ num_right = 0
 accuracy = 1.0
 
 for i in range(500):
-    for start, end in zip(range(0, len(train_img), 128), range(128,
-        len(train_img), 128)):
+    for start, end in zip(range(0, len(train_set), 128), range(128, len(train_set), 128)):
         sess.run(training_operation, feed_dict={
             X: train_img[start : end],
             Y: train_label[start : end],
@@ -68,15 +87,20 @@ for i in range(500):
             p_keep_hidden: 0.5
         })
 
-    test_indices = numpy.arange(len(test_img)) # Test batch
+    test_set = numpy.array([ tensor.eval(session=sess) for tensor in test_set ])
+    test_lbls = numpy.array([ tensor.eval(session=sess) for tensor in test_lbls])
+
+    test_indices = numpy.arange(len(test_set)) # Test batch
     numpy.random.shuffle(test_indices)
     test_indices = test_indices[0 : 256] # Limit tests to the first 256 tests
+    print test_indices
+    print test_lbls
 
     FEEDBACK_STRING = str(i)
-    PREDICTION = (np.mean(np.argmax(test_label[test_indices], axis=1) ==
+    PREDICTION = (numpy.mean(numpy.argmax(test_lbls[test_indices], axis=0) ==
         sess.run(prediction_operation, feed_dict={
-            X: test_img[test_indices],
-            Y: test_label[test_indices],
+            X: test_set[test_indices],
+            Y: test_lbls[test_indices],
             p_keep_conv: 1.0,
             p_keep_hidden: 1.0
         })))
